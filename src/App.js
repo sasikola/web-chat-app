@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import SimplePeer from "simple-peer";
 import EmojiPicker from "emoji-picker-react";
+import ringtone from "./iphone.mp3";
 
 // Updated socket URL to use the new one
 const socket = io("https://auth-c7xw.onrender.com/");
@@ -28,6 +29,14 @@ const App = () => {
   useEffect(() => {
     socket.on("message", (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
+
+      // Play ringtone if message is from someone else
+      if (msg.username !== username) {
+        const audio = new Audio(ringtone); // Ensure this file is in /public folder
+        audio.play().catch((err) => {
+          console.error("Failed to play sound:", err);
+        });
+      }
     });
 
     socket.on("users", (userList) => {
@@ -51,7 +60,7 @@ const App = () => {
       socket.off("incoming-call");
       socket.off("call-answered");
     };
-  }, []);
+  }, [username]);
 
   const handleJoin = () => {
     if (username.trim() !== "") {
